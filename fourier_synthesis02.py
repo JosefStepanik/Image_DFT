@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-image_filename = "Earth.png"
+image_filename = "Elizabeth_Tower_London.jpg"
 
 def calculate_2dft(input):
     ft = np.fft.ifftshift(input)
@@ -41,7 +41,11 @@ image = plt.imread(image_filename)
 image = image[:, :, :3].mean(axis=2)  # Convert to grayscale
 
 # Array dimensions (array is square) and centre pixel
-array_size = len(image)
+# Use smallest of the dimensions and ensure it's odd
+array_size = min(image.shape) - 1 + min(image.shape) % 2
+
+# Crop image so it's a square image
+image = image[:array_size, :array_size]
 centre = int((array_size - 1) / 2)
 
 # Get all coordinate pairs in the left half of the array,
@@ -82,7 +86,7 @@ individual_grating = np.zeros(
 idx = 0
 
 # All steps are displayed until display_all_until value
-display_all_until = 50
+display_all_until = 200
 # After this, skip which steps to display using the
 # display_step value
 display_step = 10
@@ -124,7 +128,7 @@ for coords in coords_left_half:
                 # Accelerate animation the further the
                 # iteration runs by increasing
                 # display_step
-                display_step += 100
+                display_step += 10
             display_plots(rec_grating, rec_image, idx)
 
 plt.show()

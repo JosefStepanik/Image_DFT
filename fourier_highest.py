@@ -1,9 +1,10 @@
-# fourier_synthesis.py
+# fourier_highest.py
 
+from pickle import TRUE
 import numpy as np
 import matplotlib.pyplot as plt
 
-image_filename = "Earth.png"
+image_filename = "Image_9.jpg"
 
 def calculate_2dft(input):
     ft = np.fft.ifftshift(input)
@@ -38,10 +39,14 @@ def display_plots(individual_grating, reconstruction, idx):
 
 # Read and process image
 image = plt.imread(image_filename)
-image = image[:, :, :3].mean(axis=2)  # Convert to grayscale
+# image = image[:, :, :3].mean(axis=2)  # Convert to grayscale
 
 # Array dimensions (array is square) and centre pixel
-array_size = len(image)
+# Use smallest of the dimensions and ensure it's odd
+array_size = min(image.shape) - 1 + min(image.shape) % 2
+
+# Crop image so it's a square image
+image = image[:array_size, :array_size]
 centre = int((array_size - 1) / 2)
 
 # Get all coordinate pairs in the left half of the array,
@@ -54,7 +59,8 @@ coords_left_half = (
 # Sort points based on distance from centre
 coords_left_half = sorted(
     coords_left_half,
-    key=lambda x: calculate_distance_from_centre(x, centre)
+    key=lambda x: calculate_distance_from_centre(x, centre),
+    # reverse = TRUE
 )
 
 plt.set_cmap("gray")
@@ -82,7 +88,7 @@ individual_grating = np.zeros(
 idx = 0
 
 # All steps are displayed until display_all_until value
-display_all_until = 50
+display_all_until = 200
 # After this, skip which steps to display using the
 # display_step value
 display_step = 10
@@ -124,7 +130,7 @@ for coords in coords_left_half:
                 # Accelerate animation the further the
                 # iteration runs by increasing
                 # display_step
-                display_step += 100
+                display_step += 10
             display_plots(rec_grating, rec_image, idx)
 
 plt.show()
