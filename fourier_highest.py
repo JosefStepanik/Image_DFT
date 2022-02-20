@@ -1,10 +1,12 @@
 # fourier_highest.py
 
 from pickle import TRUE
+from cv2 import threshold
 import numpy as np
 import matplotlib.pyplot as plt
 
 image_filename = "Image_9.jpg"
+thresH = 10
 
 def calculate_2dft(input):
     ft = np.fft.ifftshift(input)
@@ -54,83 +56,43 @@ centre = int((array_size - 1) / 2)
 # includes the centre pixel)
 coords_left_half = (
     (x, y) for x in range(array_size) for y in range(centre+1)
+    
 )
-
 # Sort points based on distance from centre
-coords_left_half = sorted(
+""" coords_left_half = sorted(
     coords_left_half,
     key=lambda x: calculate_distance_from_centre(x, centre),
-    # reverse = TRUE
-)
+    # reverse=True
+) """
 
 plt.set_cmap("gray")
 
 ft = calculate_2dft(image)
+scaled = np.log(abs(ft))
+
+max_freq = np.amax(scaled)
+print(max_freq)
+rec_image = np.zeros(coords_left_half.shape)
+
+for x in scaled:
+    for y in x:
+        if scaled(x,y) > thresH : 
+            rec_image(x,y) = scaled(x,y)
+    # Central column: only include if points in top half of
+    # the central column
+    if not (coords[1] == centre and coords[0] > centre):
+        if scaled(coords) > thresH : 
+            rec_image(coords) = scaled(coords)
+
+
 
 # Show grayscale image and its Fourier transform
 plt.subplot(121)
 plt.imshow(image)
 plt.axis("off")
 plt.subplot(122)
-plt.imshow(np.log(abs(ft)))
+plt.imshow(scaled)
 plt.axis("off")
 plt.pause(2)
-
-# Reconstruct image
-fig = plt.figure()
-# Step 1
-# Set up empty arrays for final image and
-# individual gratings
-rec_image = np.zeros(image.shape)
-individual_grating = np.zeros(
-    image.shape, dtype="complex"
-)
-idx = 0
-
-# All steps are displayed until display_all_until value
-display_all_until = 200
-# After this, skip which steps to display using the
-# display_step value
-display_step = 10
-# Work out index of next step to display
-next_display = display_all_until + display_step
-
-# Step 2
-for coords in coords_left_half:
-    # Central column: only include if points in top half of
-    # the central column
-    if not (coords[1] == centre and coords[0] > centre):
-        idx += 1
-        symm_coords = find_symmetric_coordinates(
-            coords, centre
-        )
-        # Step 3
-        # Copy values from Fourier transform into
-        # individual_grating for the pair of points in
-        # current iteration
-        individual_grating[coords] = ft[coords]
-        individual_grating[symm_coords] = ft[symm_coords]
-
-        # Step 4
-        # Calculate inverse Fourier transform to give the
-        # reconstructed grating. Add this reconstructed
-        # grating to the reconstructed image
-        rec_grating = calculate_2dift(individual_grating)
-        rec_image += rec_grating
-
-        # Clear individual_grating array, ready for
-        # next iteration
-        individual_grating[coords] = 0
-        individual_grating[symm_coords] = 0
-
-        # Don't display every step
-        if idx < display_all_until or idx == next_display:
-            if idx > display_all_until:
-                next_display += display_step
-                # Accelerate animation the further the
-                # iteration runs by increasing
-                # display_step
-                display_step += 10
-            display_plots(rec_grating, rec_image, idx)
 
 plt.show()
