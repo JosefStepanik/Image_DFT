@@ -1,12 +1,13 @@
 # fourier_highest.py
 
+from os import CLD_STOPPED
 from pickle import TRUE
+from re import M
 from cv2 import threshold
 import numpy as np
 import matplotlib.pyplot as plt
 
 image_filename = "Image_9.jpg"
-thresH = 10
 
 def calculate_2dft(input):
     ft = np.fft.ifftshift(input)
@@ -69,20 +70,32 @@ plt.set_cmap("gray")
 
 ft = calculate_2dft(image)
 scaled = np.log(abs(ft))
+scaled_clone = np.copy(scaled)
 
 max_freq = np.amax(scaled)
 print(max_freq)
-rec_image = np.zeros(coords_left_half.shape)
+new_image = np.zeros(scaled.shape)
 
-for x in scaled:
+for x in scaled_clone:
     for y in x:
-        if scaled(x,y) > thresH : 
-            rec_image(x,y) = scaled(x,y)
-    # Central column: only include if points in top half of
-    # the central column
-    if not (coords[1] == centre and coords[0] > centre):
-        if scaled(coords) > thresH : 
-            rec_image(coords) = scaled(coords)
+        if y < 11 :
+            y = 0
+
+max = 0
+for index, value in np.ndenumerate(scaled_clone):
+    #print(index_x, x)
+    #find maximum
+    if value > max :
+        max = value
+        #for normalization
+    if value < 11 :
+        new_image[index] = 0
+    else :
+        new_image[index] = value
+        print(new_image, value)CLD_STOPPED
+
+
+
 
 
 
